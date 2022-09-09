@@ -1,9 +1,19 @@
 const DB = require("./db.json");
-const { saveToDatabase } = require("./utils");
+const { saveToDatabase, sortBy } = require("./utils");
 
-const getAllWorkouts = () => {
+const getAllWorkouts = (filterParams) => {
     try {
-        return DB.workouts;
+        //default query size & sorting
+        let { mode, page=1, length=3, sort="updatedAt" } = filterParams;
+        let pageStart = (page - 1) * length;
+        let workouts = DB.workouts
+            .slice(pageStart, pageStart + length)
+            .sort(sortBy(sort));
+
+        if(filterParams.mode) {
+            return workouts.filter( (workout) => workout.mode.toLowerCase().includes(mode) );
+        }
+        return workouts;
     } catch (error) {
         throw {status: 500, message: error}
     }
